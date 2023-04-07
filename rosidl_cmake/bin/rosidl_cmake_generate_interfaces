@@ -1,0 +1,41 @@
+#!/usr/bin/env python3
+
+import argparse
+import os
+import sys
+
+try:
+    from rosidl_cmake import generate_files_batch
+except ImportError:
+    # modifying sys.path and importing the Python package with the same
+    # name as this script does not work on Windows
+    rosidl_cmake_root = os.path.dirname(os.path.dirname(__file__))
+    rosidl_cmake_module = os.path.join(
+        rosidl_cmake_root, 'rosidl_cmake', '__init__.py')
+    if not os.path.exists(rosidl_cmake_module):
+        raise
+    from importlib.machinery import SourceFileLoader
+
+    loader = SourceFileLoader('rosidl_cmake', rosidl_cmake_module)
+    rosidl_cmake = loader.load_module()
+    generate_files_batch = rosidl_cmake.generate_files_batch
+
+
+def main(argv=sys.argv[1:]):
+    parser = argparse.ArgumentParser(
+        description='Generate the ROS interfaces.',
+        formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+    parser.add_argument(
+        '--generator-arguments-files',
+        required=True,
+        help='List of the locations of the files containing the generator arguments')
+    args = parser.parse_args(argv)
+
+    arg_files = args.generator_arguments_files.split(';')
+    print("arg_files = ", arg_files) # TODO: remove
+
+    generate_files_batch(arg_files) # TODO: Rename?
+
+
+if __name__ == '__main__':
+    sys.exit(main())

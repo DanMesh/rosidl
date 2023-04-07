@@ -12,15 +12,17 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-macro(rosidl_generator_cpp_extras BIN GENERATOR_FILES TEMPLATE_DIR)
+macro(rosidl_generator_cpp_extras GENERATOR_FILES TEMPLATE_DIR)
   find_package(ament_cmake_core QUIET REQUIRED)
+
+  ament_register_extension(
+    "rosidl_write_generator_arguments_extensions"
+    "rosidl_generator_cpp"
+    "rosidl_generator_cpp_write_arguments.cmake")
   ament_register_extension(
     "rosidl_generate_idl_interfaces"
     "rosidl_generator_cpp"
     "rosidl_generator_cpp_generate_interfaces.cmake")
-
-  normalize_path(BIN "${BIN}")
-  set(rosidl_generator_cpp_BIN "${BIN}")
 
   normalize_path(GENERATOR_FILES "${GENERATOR_FILES}")
   set(rosidl_generator_cpp_GENERATOR_FILES "${GENERATOR_FILES}")

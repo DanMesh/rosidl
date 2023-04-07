@@ -18,8 +18,10 @@ import os
 import pathlib
 import re
 import sys
+import time
 
 import em
+from rosidl_cmake.generator_config import GeneratorConfig
 from rosidl_parser.definition import IdlLocator
 from rosidl_parser.parser import parse_idl_file
 
@@ -54,6 +56,14 @@ def generate_files(
 ):
     args = read_generator_arguments(generator_arguments_file)
 
+    out_string = "\nrosidl_cmake::generate_files:" + \
+        "\n arg file   = " + generator_arguments_file + \
+        "\n output dir = " + str(args['output_dir']) + \
+        "\n idl_tuples = " + str(args['idl_tuples']) + \
+        "\n add. ctxt. = " + (str(additional_context) if additional_context is not None else "[]") + \
+        "\n"
+    # print(out_string)
+
     template_basepath = pathlib.Path(args['template_dir'])
     for template_filename in mapping.keys():
         assert (template_basepath / template_filename).exists(), \
@@ -62,7 +72,13 @@ def generate_files(
     latest_target_timestamp = get_newest_modification_time(args['target_dependencies'])
     generated_files = []
 
+    time_parse_idl = 0.0
+    time_expand_template = 0.0
+
+    t_start = time.time()
+
     for idl_tuple in args.get('idl_tuples', []):
+        out_string += " - idl_tuple =" + idl_tuple + "\n"
         idl_parts = idl_tuple.rsplit(':', 1)
         assert len(idl_parts) == 2
         locator = IdlLocator(*idl_parts)
@@ -71,7 +87,12 @@ def generate_files(
         if not keep_case:
             idl_stem = convert_camel_case_to_lower_case_underscore(idl_stem)
         try:
+            t_1 = time.time()
             idl_file = parse_idl_file(locator)
+            t_2 = time.time()
+            time_parse_idl += t_2 - t_1
+            out_string += "   - parse_idl_file = " + str(t_2 - t_1) + "\n"
+            out_string += "   - expand_template\n"
             for template_file, generated_filename in mapping.items():
                 generated_file = os.path.join(
                     args['output_dir'], str(idl_rel_path.parent),
@@ -84,16 +105,137 @@ def generate_files(
                 }
                 if additional_context is not None:
                     data.update(additional_context)
+                out_string += "     - exists? " + str(os.path.exists(generated_file))
+                t_3 = time.time()
+                # Generate the actual headers etc.
                 expand_template(
                     os.path.basename(template_file), data,
                     generated_file, minimum_timestamp=latest_target_timestamp,
                     template_basepath=template_basepath,
                     post_process_callback=post_process_callback)
+                t_4 = time.time()
+                time_expand_template += t_4 - t_3
+                out_string += " --> " + str(os.path.exists(generated_file)) + "\n"
+                out_string += "     - " + str(t_4 - t_3) + " (" + generated_file + ")\n"
         except Exception as e:
             print(
                 'Error processing idl file: ' +
                 str(locator.get_absolute_path()), file=sys.stderr)
             raise(e)
+
+    t_end = time.time()
+    out_string += "time = " + str(t_end - t_start) + "\n"
+    out_string += " - parse_idl_file  (all) " + str(time_parse_idl) + "\n"
+    out_string += " - expand_template (all) " + str(time_expand_template) + "\n"
+
+    out_string += "generated files:\n" + str(generated_files)
+    print(out_string)
+
+    return generated_files
+
+
+def get_generator_module(module_path):
+    if not os.path.exists(module_path):
+        raise
+
+    from importlib.machinery import SourceFileLoader
+
+    loader = SourceFileLoader('generator_files_module', module_path)
+    generator_files_module = loader.load_module()
+    return generator_files_module
+
+
+def generate_files_batch(arguments_files = []
+):
+    # Get mapping of IDL files to configs
+    configs_for_idl_tuple = {}
+    for arg_file in arguments_files:
+        config = GeneratorConfig(arg_file)
+
+        for idl_tuple in config.arguments.get('idl_tuples', []):
+            idl_parts = idl_tuple.rsplit(':', 1)
+            assert len(idl_parts) == 2
+
+            if idl_tuple in configs_for_idl_tuple:
+                configs_for_idl_tuple[idl_tuple].append(config)
+            else:
+                configs_for_idl_tuple[idl_tuple] = [config]
+
+    out_string = ""
+    time_parse_idl = 0.0
+    time_expand_template = 0.0
+    t_start = time.time()
+
+    # Parse each IDL file and generate code from mapped templates
+    generated_files = []
+    for idl_tuple in configs_for_idl_tuple.keys():
+        out_string += " - " + idl_tuple + "\n"
+
+        # Parse IDl file
+        idl_parts = idl_tuple.rsplit(':', 1)
+        assert len(idl_parts) == 2
+        locator = IdlLocator(*idl_parts)
+        idl_rel_path = pathlib.Path(idl_parts[1])
+        idl_stem = idl_rel_path.stem
+        if not config.keep_case:
+            idl_stem = convert_camel_case_to_lower_case_underscore(idl_stem)
+        try:
+            t_1 = time.time()
+            idl_file = parse_idl_file(locator)
+            t_2 = time.time()
+            time_parse_idl += t_2 - t_1
+            out_string += "   - parse_idl_file = " + str(t_2 - t_1) + "\n"
+            out_string += "   - expand_template\n"
+
+            # Generate code from templates according to each of the generator configs
+            for config in configs_for_idl_tuple[idl_tuple]:
+                template_basepath = pathlib.Path(config.arguments['template_dir'])
+                for template_filename in config.mapping.keys():
+                    assert (template_basepath / template_filename).exists(), \
+                        'Could not find template: ' + template_filename
+
+                latest_target_timestamp = get_newest_modification_time(config.arguments['target_dependencies'])
+
+                # IDL data
+                data = {
+                    'package_name': config.arguments['package_name'],
+                    'interface_path': idl_rel_path,
+                    'content': idl_file.content,
+                }
+                if config.additional_context is not None:
+                    data.update(config.additional_context)
+
+                out_string += "     - " + config.arguments_file + "\n"
+
+                # Expand templates
+                for template_file, generated_filename in config.mapping.items():
+                    generated_file = os.path.join(
+                        config.arguments['output_dir'], str(idl_rel_path.parent),
+                        generated_filename % idl_stem)
+                    generated_files.append(generated_file)
+                    out_string += "       - exists? " + str(os.path.exists(generated_file))
+                    t_3 = time.time()
+                    # Generate the actual headers etc.
+                    expand_template(
+                        os.path.basename(template_file), data,
+                        generated_file, minimum_timestamp=latest_target_timestamp,
+                        template_basepath=template_basepath,
+                        post_process_callback=config.post_process_callback)
+                    t_4 = time.time()
+                    time_expand_template += t_4 - t_3
+                    out_string += " --> " + str(os.path.exists(generated_file)) + "\n"
+                    out_string += "       - " + str(t_4 - t_3) + " (" + generated_file + ")\n"
+
+        except Exception as e:
+            print('Error processing idl file: ' + str(locator.get_absolute_path()), file=sys.stderr)
+            raise(e)
+
+    t_end = time.time()
+    out_string += "time = " + str(t_end - t_start) + "\n"
+    out_string += " - parse_idl_file  (all) " + str(time_parse_idl) + "\n"
+    out_string += " - expand_template (all) " + str(time_expand_template) + "\n"
+
+    print("BATCH!!! Found: " + out_string)
 
     return generated_files
 

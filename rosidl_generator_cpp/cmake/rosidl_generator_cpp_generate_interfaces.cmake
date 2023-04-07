@@ -42,8 +42,9 @@ foreach(_pkg_name ${rosidl_generate_interfaces_DEPENDENCY_PACKAGE_NAMES})
   endforeach()
 endforeach()
 
+set(generator_arguments_file "${CMAKE_CURRENT_BINARY_DIR}/rosidl_generator_cpp__arguments.json")
+
 set(target_dependencies
-  "${rosidl_generator_cpp_BIN}"
   ${rosidl_generator_cpp_GENERATOR_FILES}
   "${rosidl_generator_cpp_TEMPLATE_DIR}/action__builder.hpp.em"
   "${rosidl_generator_cpp_TEMPLATE_DIR}/action__struct.hpp.em"
@@ -59,35 +60,13 @@ set(target_dependencies
   "${rosidl_generator_cpp_TEMPLATE_DIR}/srv__struct.hpp.em"
   "${rosidl_generator_cpp_TEMPLATE_DIR}/srv__traits.hpp.em"
   ${rosidl_generate_interfaces_ABS_IDL_FILES}
+  ${generator_arguments_file}
   ${_dependency_files})
 foreach(dep ${target_dependencies})
   if(NOT EXISTS "${dep}")
     message(FATAL_ERROR "Target dependency '${dep}' does not exist")
   endif()
 endforeach()
-
-set(generator_arguments_file "${CMAKE_CURRENT_BINARY_DIR}/rosidl_generator_cpp__arguments.json")
-rosidl_write_generator_arguments(
-  "${generator_arguments_file}"
-  PACKAGE_NAME "${PROJECT_NAME}"
-  IDL_TUPLES "${rosidl_generate_interfaces_IDL_TUPLES}"
-  ROS_INTERFACE_DEPENDENCIES "${_dependencies}"
-  OUTPUT_DIR "${_output_path}"
-  TEMPLATE_DIR "${rosidl_generator_cpp_TEMPLATE_DIR}"
-  TARGET_DEPENDENCIES ${target_dependencies}
-)
-
-find_package(Python3 REQUIRED COMPONENTS Interpreter)
-
-add_custom_command(
-  OUTPUT ${_generated_headers}
-  COMMAND Python3::Interpreter
-  ARGS ${rosidl_generator_cpp_BIN}
-  --generator-arguments-file "${generator_arguments_file}"
-  DEPENDS ${target_dependencies}
-  COMMENT "Generating C++ code for ROS interfaces"
-  VERBATIM
-)
 
 # INTERFACE libraries can't have file-level dependencies in CMake,
 # so make a custom target depending on the generated files
@@ -97,7 +76,7 @@ add_custom_command(
 add_custom_target(
   ${rosidl_generate_interfaces_TARGET}__cpp
   DEPENDS
-  ${_generated_headers}
+  rosidl_cmake_generated_interface_sources
 )
 
 set(_target_suffix "__rosidl_generator_cpp")

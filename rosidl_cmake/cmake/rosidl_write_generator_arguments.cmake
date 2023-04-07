@@ -23,7 +23,8 @@ function(rosidl_write_generator_arguments output_file)
     "PACKAGE_NAME")
   set(OPTIONAL_ONE_VALUE_KEYWORDS
     "OUTPUT_DIR"
-    "TEMPLATE_DIR")
+    "TEMPLATE_DIR"
+    "GENERATOR_FILES")
 
   set(REQUIRED_MULTI_VALUE_KEYWORDS  # only require one of them
     "IDL_TUPLES"

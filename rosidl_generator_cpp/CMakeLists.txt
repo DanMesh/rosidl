@@ -22,7 +22,6 @@ if(BUILD_TESTING)
   set(rosidl_generator_cpp_DIR "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 
   rosidl_generator_cpp_extras(
-    "${CMAKE_CURRENT_SOURCE_DIR}/bin/rosidl_generator_cpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/rosidl_generator_cpp/__init__.py"
     "${CMAKE_CURRENT_SOURCE_DIR}/resource"
   )
@@ -123,10 +122,6 @@ ament_package(
   CONFIG_EXTRAS "rosidl_generator_cpp-extras.cmake.in"
 )
 
-install(
-  PROGRAMS bin/rosidl_generator_cpp
-  DESTINATION lib/rosidl_generator_cpp
-)
 install(
   DIRECTORY cmake resource
   DESTINATION share/${PROJECT_NAME}
