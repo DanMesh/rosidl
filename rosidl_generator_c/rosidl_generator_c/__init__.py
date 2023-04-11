@@ -26,14 +26,17 @@ from rosidl_parser.definition import NamespacedType
 from rosidl_parser.definition import OCTET_TYPE
 
 
-def generate_c(generator_arguments_file):
-    mapping = {
+def get_template_mapping():
+    return {
         'idl.h.em': '%s.h',
         'idl__functions.c.em': 'detail/%s__functions.c',
         'idl__functions.h.em': 'detail/%s__functions.h',
         'idl__struct.h.em': 'detail/%s__struct.h',
         'idl__type_support.h.em': 'detail/%s__type_support.h',
     }
+
+def generate_c(generator_arguments_file):
+    mapping = get_template_mapping()
     return generate_files(
         generator_arguments_file, mapping,
         post_process_callback=prefix_with_bom_if_necessary)
@@ -48,6 +51,10 @@ def prefix_with_bom_if_necessary(content):
             'since it contain non-ASCII characters\n'
         content = prefix + content
     return content
+
+
+def post_process_callback(content):
+    return prefix_with_bom_if_necessary(content)
 
 
 BASIC_IDL_TYPES_TO_C = {

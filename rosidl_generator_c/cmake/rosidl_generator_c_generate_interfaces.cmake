@@ -48,8 +48,9 @@ foreach(_pkg_name ${rosidl_generate_interfaces_DEPENDENCY_PACKAGE_NAMES})
   endforeach()
 endforeach()
 
+set(generator_arguments_file "${CMAKE_CURRENT_BINARY_DIR}/rosidl_generator_c__arguments.json")
+
 set(target_dependencies
-  "${rosidl_generator_c_BIN}"
   ${rosidl_generator_c_GENERATOR_FILES}
   "${rosidl_generator_c_TEMPLATE_DIR}/action__type_support.h.em"
   "${rosidl_generator_c_TEMPLATE_DIR}/idl.h.em"
@@ -63,35 +64,13 @@ set(target_dependencies
   "${rosidl_generator_c_TEMPLATE_DIR}/msg__type_support.h.em"
   "${rosidl_generator_c_TEMPLATE_DIR}/srv__type_support.h.em"
   ${rosidl_generate_interfaces_ABS_IDL_FILES}
+  ${generator_arguments_file}
   ${_dependency_files})
 foreach(dep ${target_dependencies})
   if(NOT EXISTS "${dep}")
     message(FATAL_ERROR "Target dependency '${dep}' does not exist")
   endif()
 endforeach()
-
-set(generator_arguments_file "${CMAKE_CURRENT_BINARY_DIR}/rosidl_generator_c__arguments.json")
-rosidl_write_generator_arguments(
-  "${generator_arguments_file}"
-  PACKAGE_NAME "${PROJECT_NAME}"
-  IDL_TUPLES "${rosidl_generate_interfaces_c_IDL_TUPLES}"
-  ROS_INTERFACE_DEPENDENCIES "${_dependencies}"
-  OUTPUT_DIR "${_output_path}"
-  TEMPLATE_DIR "${rosidl_generator_c_TEMPLATE_DIR}"
-  TARGET_DEPENDENCIES ${target_dependencies}
-)
-
-find_package(Python3 REQUIRED COMPONENTS Interpreter)
-
-add_custom_command(
-  OUTPUT ${_generated_headers} ${_generated_sources}
-  COMMAND Python3::Interpreter
-  ARGS ${rosidl_generator_c_BIN}
-  --generator-arguments-file "${generator_arguments_file}"
-  DEPENDS ${target_dependencies}
-  COMMENT "Generating C code for ROS interfaces"
-  VERBATIM
-)
 
 # generate header to switch between export and import for a specific package
 set(_visibility_control_file
