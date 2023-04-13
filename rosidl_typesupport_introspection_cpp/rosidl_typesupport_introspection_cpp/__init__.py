@@ -15,6 +15,14 @@
 from rosidl_cmake import generate_files
 
 
+def get_template_mapping():
+    return {
+        'idl__rosidl_typesupport_introspection_cpp.hpp.em':
+        'detail/%s__rosidl_typesupport_introspection_cpp.hpp',
+        'idl__type_support.cpp.em': 'detail/%s__type_support.cpp',
+    }
+
+
 def generate_cpp(generator_arguments_file: str):
     """
     Generate the C++ implementation of the type support.
@@ -23,9 +31,5 @@ def generate_cpp(generator_arguments_file: str):
         arguments for the generator.
     :type generator_arguments_file: str
     """
-    mapping = {
-        'idl__rosidl_typesupport_introspection_cpp.hpp.em':
-        'detail/%s__rosidl_typesupport_introspection_cpp.hpp',
-        'idl__type_support.cpp.em': 'detail/%s__type_support.cpp',
-    }
+    mapping = get_template_mapping()
     return generate_files(generator_arguments_file, mapping)
