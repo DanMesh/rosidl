@@ -231,11 +231,12 @@ def generate_files_batch(arguments_files = []
             raise(e)
 
     t_end = time.time()
-    out_string += "time = " + str(t_end - t_start) + "\n"
-    out_string += " - parse_idl_file  (all) " + str(time_parse_idl) + "\n"
-    out_string += " - expand_template (all) " + str(time_expand_template) + "\n"
+    out_string += "Timing\n"
+    out_string += " - parse_idl_file  = " + str(time_parse_idl) + "\n"
+    out_string += " - expand_template = " + str(time_expand_template) + "\n"
+    out_string += " - TOTAL           = " + str(t_end - t_start) + "\n"
 
-    print("BATCH!!! Found: " + out_string)
+    print("GENERATED BATCH!!!\n" + out_string)
 
     return generated_files
 

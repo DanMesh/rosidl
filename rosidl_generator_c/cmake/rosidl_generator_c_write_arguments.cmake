@@ -47,7 +47,6 @@ set(target_dependencies
   "${rosidl_generator_c_TEMPLATE_DIR}/msg__type_support.h.em"
   "${rosidl_generator_c_TEMPLATE_DIR}/srv__type_support.h.em"
   ${rosidl_generate_interfaces_ABS_IDL_FILES}
-  ${generator_arguments_file}
   ${_dependency_files})
 foreach(dep ${target_dependencies})
   if(NOT EXISTS "${dep}")

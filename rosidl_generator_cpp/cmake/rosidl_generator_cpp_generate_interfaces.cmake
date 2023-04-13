@@ -76,7 +76,7 @@ endforeach()
 add_custom_target(
   ${rosidl_generate_interfaces_TARGET}__cpp
   DEPENDS
-  rosidl_cmake_generated_interface_sources
+  ${_generated_headers}
 )
 
 set(_target_suffix "__rosidl_generator_cpp")
