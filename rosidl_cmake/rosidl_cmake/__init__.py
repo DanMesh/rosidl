@@ -189,6 +189,7 @@ def generate_files_batch(arguments_files = []
 
             # Generate code from templates according to each of the generator configs
             for config in configs_for_idl_tuple[idl_tuple]:
+                out_string += "     - " + config.arguments_file + "\n"
                 template_basepath = pathlib.Path(config.arguments['template_dir'])
                 for template_filename in config.mapping.keys():
                     assert (template_basepath / template_filename).exists(), \
@@ -204,8 +205,7 @@ def generate_files_batch(arguments_files = []
                 }
                 if config.additional_context is not None:
                     data.update(config.additional_context)
-
-                out_string += "     - " + config.arguments_file + "\n"
+                    out_string += "       - add. ctxt. = " + str(config.additional_context) + "\n"
 
                 # Expand templates
                 for template_file, generated_filename in config.mapping.items():

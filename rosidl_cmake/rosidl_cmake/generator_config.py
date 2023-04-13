@@ -39,8 +39,8 @@ class GeneratorConfig:
 
         # Additional context (optional)
         self.additional_context = None
-        if hasattr(generator_files_module, 'get_additional_context'):
-            self.additional_context = generator_files_module.get_additional_context()
+        if 'additional_context_file' in self.arguments:
+            self.additional_context = read_generator_arguments(self.arguments['additional_context_file'])
 
         # Keep case (optional)
         self.keep_case = False
