@@ -17,11 +17,6 @@ foreach(_abs_idl_file ${rosidl_generate_interfaces_ABS_IDL_FILES})
   )
 endforeach()
 
-list(APPEND rosidl_interface_files_to_generate
-  ${_generated_headers}
-  ${_generated_sources}
-)
-
 set(_dependency_files "")
 set(_dependencies "")
 foreach(_pkg_name ${rosidl_generate_interfaces_DEPENDENCY_PACKAGE_NAMES})

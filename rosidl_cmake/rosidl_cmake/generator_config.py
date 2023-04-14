@@ -3,18 +3,18 @@ import os
 import pathlib
 
 
-def read_generator_arguments(input_file):
+def read_json_file(input_file):
     with open(input_file, mode='r', encoding='utf-8') as h:
         return json.load(h)
 
 
-def get_generator_module(module_path):
+def get_generator_module(module_name, module_path):
     if not os.path.exists(module_path):
         raise
 
     from importlib.machinery import SourceFileLoader
 
-    loader = SourceFileLoader('generator_files_module', module_path)
+    loader = SourceFileLoader(module_name, module_path)
     generator_files_module = loader.load_module()
     return generator_files_module
 
@@ -23,9 +23,13 @@ class GeneratorConfig:
 
     def __init__(self, arguments_file):
         self.arguments_file = arguments_file
-        self.arguments = read_generator_arguments(self.arguments_file)
+        self.arguments = read_json_file(self.arguments_file)
+
+        # Create a unique module name from the arguments file
+        module_name = self.arguments_file.rsplit('/', 1)[-1].rsplit('__', 1)[0]
+
         generator_files_module_path = os.path.normpath(self.arguments['generator_files'])
-        generator_files_module = get_generator_module(generator_files_module_path)
+        generator_files_module = get_generator_module(module_name, generator_files_module_path)
 
         # Get template mapping (required)
         if not hasattr(generator_files_module, 'get_template_mapping'):
@@ -40,7 +44,7 @@ class GeneratorConfig:
         # Additional context (optional)
         self.additional_context = None
         if 'additional_context_file' in self.arguments:
-            self.additional_context = read_generator_arguments(self.arguments['additional_context_file'])
+            self.additional_context = read_json_file(self.arguments['additional_context_file'])
 
         # Keep case (optional)
         self.keep_case = False

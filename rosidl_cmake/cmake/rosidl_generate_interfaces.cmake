@@ -284,27 +284,21 @@ macro(rosidl_generate_interfaces target)
   endforeach()
 
   set(rosidl_generator_arguments_files)
-  set(rosidl_interface_files_to_generate)
 
+  # Write the generator argument files for all registered languages and type supports
   ament_execute_extensions("rosidl_write_generator_arguments_extensions")
-
-  set(rosidl_cmake_generate_interfaces_BIN "${rosidl_cmake_DIR}/../../../lib/rosidl_cmake/rosidl_cmake_generate_interfaces")
 
   find_package(Python3 REQUIRED COMPONENTS Interpreter)
 
-  add_custom_command(
-    OUTPUT ${rosidl_interface_files_to_generate}
-    COMMAND Python3::Interpreter
-    ARGS ${rosidl_cmake_generate_interfaces_BIN}
+  # Generate the interface source files for all registered languages and type supports
+  set(rosidl_cmake_generate_interfaces_BIN "${rosidl_cmake_DIR}/../../../lib/rosidl_cmake/rosidl_cmake_generate_interfaces")
+  execute_process(
+    COMMAND ${Python3_EXECUTABLE} ${rosidl_cmake_generate_interfaces_BIN}
     --generator-arguments-files "${rosidl_generator_arguments_files}"
-    DEPENDS ${rosidl_generator_arguments_files}
-    COMMENT "Generating ROS interfaces from templates"
-    VERBATIM
-  )
-  add_custom_target(rosidl_cmake_generated_interface_sources
-    DEPENDS ${rosidl_interface_files_to_generate}
+    ECHO_OUTPUT_VARIABLE
   )
 
+  # Build the interfaces from the generated files
   ament_execute_extensions("rosidl_generate_idl_interfaces")
 
   # check for extensions registered with the previous extension point

@@ -32,7 +32,6 @@ def main(argv=sys.argv[1:]):
     args = parser.parse_args(argv)
 
     arg_files = args.generator_arguments_files.split(';')
-    print("arg_files = ", arg_files) # TODO: remove
 
     generate_files_batch(arg_files) # TODO: Rename?
 

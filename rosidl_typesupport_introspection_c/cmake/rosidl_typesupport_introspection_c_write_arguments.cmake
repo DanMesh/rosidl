@@ -13,11 +13,6 @@ foreach(_abs_idl_file ${rosidl_generate_interfaces_ABS_IDL_FILES})
     "${_output_path}/${_parent_folder}/detail/${_header_name}__type_support.c")
 endforeach()
 
-list(APPEND rosidl_interface_files_to_generate
-  ${_generated_header_files}
-  ${_generated_source_files}
-)
-
 set(_dependency_files "")
 set(_dependencies "")
 foreach(_pkg_name ${rosidl_generate_interfaces_DEPENDENCY_PACKAGE_NAMES})

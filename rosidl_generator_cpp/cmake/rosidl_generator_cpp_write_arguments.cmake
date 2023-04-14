@@ -1,12 +1,13 @@
 set(_output_path
   "${CMAKE_CURRENT_BINARY_DIR}/rosidl_generator_cpp/${PROJECT_NAME}")
+set(_generated_headers "")
 foreach(_abs_idl_file ${rosidl_generate_interfaces_ABS_IDL_FILES})
   get_filename_component(_parent_folder "${_abs_idl_file}" DIRECTORY)
   get_filename_component(_parent_folder "${_parent_folder}" NAME)
   get_filename_component(_idl_name "${_abs_idl_file}" NAME_WE)
   string_camel_case_to_lower_case_underscore("${_idl_name}" _header_name)
 
-  list(APPEND rosidl_interface_files_to_generate
+  list(APPEND _generated_headers
     "${_output_path}/${_parent_folder}/${_header_name}.hpp"
     "${_output_path}/${_parent_folder}/detail/${_header_name}__builder.hpp"
     "${_output_path}/${_parent_folder}/detail/${_header_name}__struct.hpp"
