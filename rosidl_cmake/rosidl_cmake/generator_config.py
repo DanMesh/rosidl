@@ -19,6 +19,18 @@ def get_generator_module(module_name, module_path):
     return generator_files_module
 
 
+def find_generator_module(module_name, generator_files):
+    for generator_file in generator_files:
+        generator_file_module_path = os.path.normpath(generator_file)
+        generator_file_module = get_generator_module(module_name, generator_file_module_path)
+
+        if hasattr(generator_file_module, 'get_template_mapping'):
+            # Found module with expected attributes
+            return generator_file_module
+
+    raise ModuleNotFoundError("Could not find generator module for '" + module_name + "' in: " + generator_files)
+
+
 class GeneratorConfig:
 
     def __init__(self, arguments_file):
@@ -28,12 +40,11 @@ class GeneratorConfig:
         # Create a unique module name from the arguments file
         module_name = self.arguments_file.rsplit('/', 1)[-1].rsplit('__', 1)[0]
 
-        generator_files_module_path = os.path.normpath(self.arguments['generator_files'])
-        generator_files_module = get_generator_module(module_name, generator_files_module_path)
+        generator_files_module = find_generator_module(module_name, self.arguments['generator_files'])
 
         # Get template mapping (required)
         if not hasattr(generator_files_module, 'get_template_mapping'):
-            raise NotImplementedError("Missing function 'get_template_mapping()' in generator module " + generator_files_module_path)
+            raise NotImplementedError("Missing function 'get_template_mapping()' in generator module for " + module_name)
         self.mapping = generator_files_module.get_template_mapping()
         # Check that templates exist
         template_basepath = pathlib.Path(self.arguments['template_dir'])

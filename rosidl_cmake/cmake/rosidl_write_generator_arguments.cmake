@@ -24,13 +24,13 @@ function(rosidl_write_generator_arguments output_file)
   set(OPTIONAL_ONE_VALUE_KEYWORDS
     "OUTPUT_DIR"
     "TEMPLATE_DIR"
-    "GENERATOR_FILES"
     "ADDITIONAL_CONTEXT_FILE")
 
   set(REQUIRED_MULTI_VALUE_KEYWORDS  # only require one of them
     "IDL_TUPLES"
     "NON_IDL_TUPLES"
-    "ROS_INTERFACE_FILES")
+    "ROS_INTERFACE_FILES"
+    "GENERATOR_FILES")
   set(OPTIONAL_MULTI_VALUE_KEYWORDS
     "ROS_INTERFACE_DEPENDENCIES"  # since the dependencies can be empty
     "TARGET_DEPENDENCIES"
