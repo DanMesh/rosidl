@@ -118,7 +118,7 @@ def generate_files(
             print(
                 'Error processing idl file: ' +
                 str(locator.get_absolute_path()), file=sys.stderr)
-            raise(e)
+            raise e
 
     return generated_files
 

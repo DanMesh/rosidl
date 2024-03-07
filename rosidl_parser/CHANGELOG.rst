@@ -2,6 +2,20 @@
 Changelog for package rosidl_parser
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+4.5.1 (2024-02-07)
+------------------
+* Remove unnecessary parentheses. (`#783 <https://github.com/ros2/rosidl/issues/783>`_)
+* Contributors: Chris Lalancette
+
+4.5.0 (2023-12-26)
+------------------
+
+4.4.2 (2023-11-06)
+------------------
+
+4.4.1 (2023-10-04)
+------------------
+
 4.4.0 (2023-09-07)
 ------------------
 
