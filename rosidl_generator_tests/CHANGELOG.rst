@@ -2,6 +2,20 @@
 Changelog for package rosidl_generator_tests
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+4.5.1 (2024-02-07)
+------------------
+
+4.5.0 (2023-12-26)
+------------------
+
+4.4.2 (2023-11-06)
+------------------
+* Fix constant generation for C++ floats (`#772 <https://github.com/ros2/rosidl/issues/772>`_)
+* Contributors: Chris Lalancette
+
+4.4.1 (2023-10-04)
+------------------
+
 4.4.0 (2023-09-07)
 ------------------
 
